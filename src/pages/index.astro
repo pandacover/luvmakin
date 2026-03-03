@@ -10,15 +10,19 @@ const recentProjects = allProjects.slice(0, 2).map((p) => ({
 }));
 ---
 
-<Layout title="Home" pathname={Astro.url.pathname}>
+<Layout
+	title="Home"
+	description="Frontend engineer building workflow systems and AI-assisted tools. Into UI architecture, AI exploration, and coffee."
+	pathname={Astro.url.pathname}
+>
 	<section class="intro">
 		<h1>luv makin</h1>
 		<p class="tagline">frontend engineer</p>
 		<p>
-			approximately 2.8 years of product experience building graph-based workflow
-			systems and ai-assisted interfaces. specialized in ui architecture for complex data flows,
-			rendering optimization, and llm-driven interaction layers. demonstrated impact on onboarding
-			and creation efficiency through measurable product improvements.
+			i've spent the last ~3 years building workflow systems and ai-assisted tools,
+			mostly focused on ui architecture and making complex data flows feel simple.
+			outside of work i like playing around with ai systems and exploring what's
+			possible with them. powered by mass amounts of coffee.
 		</p>
 	</section>
 
