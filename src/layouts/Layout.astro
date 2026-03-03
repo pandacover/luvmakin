@@ -1,0 +1,63 @@
+---
+import '../styles/global.css';
+
+interface Props {
+	title: string;
+	pathname?: string;
+}
+
+const { title, pathname = '/' } = Astro.props;
+const currentPath = pathname.replace(/\/$/, '') || '/';
+---
+
+<!doctype html>
+<html lang="en">
+	<head>
+		<meta charset="utf-8" />
+		<link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+		<link rel="icon" href="/favicon.ico" />
+		<meta name="viewport" content="width=device-width, initial-scale=1" />
+		<meta name="generator" content={Astro.generator} />
+		<title>{title}</title>
+		<link rel="preconnect" href="https://fonts.googleapis.com" />
+		<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+		<link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet" />
+	</head>
+	<body>
+		<div class="page">
+			<main class="content">
+				<slot />
+			</main>
+			<aside class="sidebar">
+				<nav class="nav" aria-label="Main navigation">
+					<a href="/" class={`nav-link ${currentPath === '/' ? 'active' : ''}`} data-key="h">
+						<span class="nav-key">[h]</span> home
+					</a>
+					<a href="/blog" class={`nav-link ${currentPath === '/blog' ? 'active' : ''}`} data-key="b">
+						<span class="nav-key">[b]</span> blog
+					</a>
+					<a href="/projects" class={`nav-link ${currentPath === '/projects' ? 'active' : ''}`} data-key="p">
+						<span class="nav-key">[p]</span> projects
+					</a>
+				</nav>
+				<div class="links">
+					<a href="https://github.com" target="_blank" rel="noopener noreferrer" data-key="g"><span class="nav-key">[g]</span> github</a>
+					<a href="https://linkedin.com" target="_blank" rel="noopener noreferrer" data-key="l"><span class="nav-key">[l]</span> linkedin</a>
+					<a href="https://x.com/flexaboiL" target="_blank" rel="noopener noreferrer" data-key="x"><span class="nav-key">[x]</span> x</a>
+				</div>
+			</aside>
+		</div>
+		<script>
+			document.addEventListener('keydown', (e) => {
+				if (e.target instanceof HTMLInputElement || e.target instanceof HTMLTextAreaElement) return;
+				const key = e.key.toLowerCase();
+				if (key === 'h') { window.location.href = '/'; e.preventDefault(); }
+				if (key === 'b') { window.location.href = '/blog'; e.preventDefault(); }
+				if (key === 'p') { window.location.href = '/projects'; e.preventDefault(); }
+				if (key === 'g') { window.open('https://github.com', '_blank'); e.preventDefault(); }
+				if (key === 'l') { window.open('https://linkedin.com', '_blank'); e.preventDefault(); }
+				if (key === 'x') { window.open('https://x.com/flexaboiL', '_blank'); e.preventDefault(); }
+			});
+		</script>
+	</body>
+</html>

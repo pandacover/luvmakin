@@ -1,0 +1,18 @@
+---
+import Layout from '../layouts/Layout.astro';
+import { getProjects } from '../lib/projects';
+
+const projects = await getProjects();
+---
+
+<Layout title="Projects" pathname={Astro.url.pathname}>
+	<h1 class="page-title section-heading">projects</h1>
+	<ul class="project-list">
+		{projects.map((project) => (
+			<li class="project-item">
+				<h3><a href={project.url} target="_blank" rel="noopener noreferrer">{project.name}</a></h3>
+				{project.summary && <p class="project-summary">{project.summary}</p>}
+			</li>
+		))}
+	</ul>
+</Layout>
