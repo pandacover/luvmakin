@@ -31,8 +31,8 @@ body {
 }
 
 .page {
-	display: grid;
-	grid-template-columns: 1fr var(--sidebar-width);
+	display: flex;
+	flex-direction: row;
 	gap: 3rem;
 	max-width: calc(var(--max-width) + var(--sidebar-width) + 4rem);
 	margin: 0 auto;
@@ -41,6 +41,7 @@ body {
 }
 
 .content {
+	flex: 1;
 	min-width: 0;
 }
 
@@ -51,6 +52,9 @@ body {
 	padding-top: 0.25rem;
 	border-left: 1px solid var(--color-border);
 	padding-left: 2rem;
+	width: var(--sidebar-width);
+	min-width: var(--sidebar-width);
+	flex-shrink: 0;
 }
 
 .nav {
@@ -71,6 +75,10 @@ body {
 	color: var(--color-text);
 }
 
+.nav-link.active {
+	cursor: default;
+}
+
 .nav-key {
 	color: var(--color-accent);
 	margin-right: 0.35rem;
@@ -84,7 +92,7 @@ body {
 
 .links a {
 	font-family: var(--font-body);
-	font-size: 0.75rem;
+	font-size: 0.8rem;
 	color: var(--color-text-muted);
 	text-decoration: none;
 }
@@ -257,7 +265,7 @@ a:hover {
 /* Responsive */
 @media (max-width: 768px) {
 	.page {
-		grid-template-columns: 1fr;
+		flex-direction: column;
 		padding: 2rem 1.5rem;
 	}
 
@@ -277,15 +285,26 @@ a:hover {
 		padding-top: 0;
 		padding-bottom: 2rem;
 		padding-left: 0;
+		width: 100%;
+		min-width: unset;
+		height: fit-content;
 	}
 
 	.nav {
 		flex-direction: row;
+		align-items: center;
 		gap: 1.5rem;
+		height: 2.25rem;
+		min-height: 2.25rem;
+		flex-shrink: 0;
 	}
 
 	.links {
 		flex-direction: row;
+		align-items: center;
 		gap: 1rem;
+		height: 2.25rem;
+		min-height: 2.25rem;
+		flex-shrink: 0;
 	}
 }

@@ -2,7 +2,11 @@
 import Layout from '../layouts/Layout.astro';
 ---
 
-<Layout title="Blog" pathname={Astro.url.pathname}>
+<Layout
+	title="Blog"
+	description="Blog posts and writing on frontend engineering, workflow systems, and AI-assisted interfaces."
+	pathname={Astro.url.pathname}
+>
 	<h1 class="page-title section-heading">blog</h1>
 	<p class="coming-soon">coming soon</p>
 </Layout>

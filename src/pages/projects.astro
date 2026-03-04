@@ -5,7 +5,11 @@ import { getProjects } from '../lib/projects';
 const projects = await getProjects();
 ---
 
-<Layout title="Projects" pathname={Astro.url.pathname}>
+<Layout
+	title="Projects"
+	description="Open source projects and side work in frontend engineering, workflow systems, and developer tools."
+	pathname={Astro.url.pathname}
+>
 	<h1 class="page-title section-heading">projects</h1>
 	<ul class="project-list">
 		{projects.map((project) => (
