@@ -1,5 +1,14 @@
-const INDEX_URL =
-	'https://raw.githubusercontent.com/pandacover/portfolio-projects-index/main/README.md';
+const GITHUB_USER = 'pandacover';
+
+/** Pinned repos from https://github.com/pandacover — update when you change pins */
+const PINNED_REPOS = [
+	'zenbrain',
+	'zenpreference',
+	'zenrag',
+	'zengrab',
+	'mobile-responsive-sonner',
+	'local-rag',
+] as const;
 
 const MAX_SUMMARY_LENGTH = 220;
 
@@ -18,6 +27,11 @@ function summarizeReadme(readme: string): string {
 	text = text.replace(/^#{1,6}\s+.+$/gm, '');
 	// Remove links but keep text: [text](url) -> text
 	text = text.replace(/\[([^\]]+)\]\([^)]+\)/g, '$1');
+	// Remove markdown images ![alt](url)
+	text = text.replace(/!\[[^\]]*\]\([^)]+\)/g, '');
+	// Remove bold/italic markers
+	text = text.replace(/\*\*([^*]+)\*\*/g, '$1');
+	text = text.replace(/\*([^*]+)\*/g, '$1');
 	// Collapse whitespace and newlines
 	text = text.replace(/\s+/g, ' ').trim();
 	// Take first sentence(s) up to max length
@@ -27,35 +41,20 @@ function summarizeReadme(readme: string): string {
 	return truncated || '';
 }
 
-function toRawUrl(githubUrl: string): string {
-	// https://github.com/owner/repo/blob/main/README.md -> https://raw.githubusercontent.com/owner/repo/main/README.md
-	const match = githubUrl.match(/github\.com\/([^/]+\/[^/]+)\/blob\/([^/]+)\/(.+)/);
-	if (!match) return githubUrl;
-	const [, repo, branch, path] = match;
-	return `https://raw.githubusercontent.com/${repo}/${branch}/${path}`;
+function getReadmeUrl(repo: string): string {
+	return `https://raw.githubusercontent.com/${GITHUB_USER}/${repo}/main/README.md`;
 }
 
-function extractNameFromUrl(url: string): string {
-	// https://github.com/pandacover/local-rag/blob/main/README.md -> local-rag
-	const match = url.match(/github\.com\/[^/]+\/([^/]+)\//);
-	return match ? match[1] : url;
+function getRepoUrl(repo: string): string {
+	return `https://github.com/${GITHUB_USER}/${repo}`;
 }
 
 export async function getProjects(): Promise<Project[]> {
-	const res = await fetch(INDEX_URL);
-	if (!res.ok) return [];
-
-	const text = await res.text();
-	const urls = text
-		.split('\n')
-		.map((line) => line.trim())
-		.filter((line) => line.startsWith('https://github.com'));
-
 	const projects: Project[] = [];
 
-	for (const url of urls) {
-		const rawUrl = toRawUrl(url);
-		const readmeRes = await fetch(rawUrl);
+	for (const repo of PINNED_REPOS) {
+		const readmeUrl = getReadmeUrl(repo);
+		const readmeRes = await fetch(readmeUrl);
 		let readme: string | null = null;
 
 		if (readmeRes.ok) {
@@ -63,8 +62,8 @@ export async function getProjects(): Promise<Project[]> {
 		}
 
 		projects.push({
-			name: extractNameFromUrl(url),
-			url: url.replace(/\/blob\/main\/README\.md$/, ''),
+			name: repo,
+			url: getRepoUrl(repo),
 			summary: readme ? summarizeReadme(readme) : null,
 		});
 	}
