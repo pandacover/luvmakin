@@ -223,6 +223,9 @@ a:hover {
 	font-size: 0.75rem;
 	color: var(--color-text-muted);
 	margin-top: 0.25rem;
+	white-space: nowrap;
+	overflow: hidden;
+	text-overflow: ellipsis;
 }
 
 /* Blog & Projects pages */
@@ -254,6 +257,8 @@ a:hover {
 	line-height: 1.6;
 	color: var(--color-text-muted);
 	margin: 0.5rem 0 0;
+	white-space: normal;
+	overflow: visible;
 }
 
 .coming-soon {
