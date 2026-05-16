@@ -1,4 +1,4 @@
-# Can a small model function relatively better with ReAct strategy
+# Can a small model perform relatively better with ReAct strategy
 
 ## The idea
 One day I had a question. Can I make My own coding agent but then I thought everybody makes a coding agent. What are you going to do different? I took up a challenge to take a very small model (in this case `qwen3.5:0.8b`), albeit capable of thinking and reasoning, and wrap it with an orchestrator, give it primitive BREW (bash, read, edit, write) tools and see if it can design a landing page for itself. 
@@ -70,3 +70,15 @@ It worked. The agent one-shotted the problem.
 
 ## Conclusion
 This concludes one thing: that if given proper context through each repetition, the model is able to solve a task which it would previously fail without proper context. Now this does not mean that the model will be able to pass the landing page benchmark but it is at least a step in a correct direction, maybe. Will report back with another blog.
+
+
+## Bibtext
+
+```bibtex
+@article{yao2022react,
+  title={ReAct: Synergizing Reasoning and Acting in Language Models},
+  author={Yao, Shunyu and Zhao, Jeffrey and Yu, Dian and Du, Nan and Shafran, Izhak and Narasimhan, Karthik and Cao, Yuan},
+  journal={arXiv preprint arXiv:2210.03629},
+  year={2022}
+}
+```
