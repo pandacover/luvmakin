@@ -1,3 +1,5 @@
+# Can a small model function relatively better with ReAct strategy
+
 ## The idea
 One day I had a question. Can I make My own coding agent but then I thought everybody makes a coding agent. What are you going to do different? I took up a challenge to take a very small model (in this case `qwen3.5:0.8b`), albeit capable of thinking and reasoning, and wrap it with an orchestrator, give it primitive BREW (bash, read, edit, write) tools and see if it can design a landing page for itself. 
 
