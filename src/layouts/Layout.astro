@@ -4,11 +4,9 @@ import '../styles/global.css';
 interface Props {
 	title: string;
 	description?: string;
-	pathname?: string;
 }
 
-const { title, description, pathname = '/' } = Astro.props;
-const currentPath = pathname.replace(/\/$/, '') || '/';
+const { title, description } = Astro.props;
 const canonicalUrl = new URL(Astro.url.pathname, Astro.site ?? Astro.url.origin).toString();
 ---
 
@@ -29,52 +27,107 @@ const canonicalUrl = new URL(Astro.url.pathname, Astro.site ?? Astro.url.origin)
 		<meta name="twitter:card" content="summary" />
 		<meta name="twitter:title" content={title} />
 		{description && <meta name="twitter:description" content={description} />}
-		<link rel="preconnect" href="https://fonts.googleapis.com" />
-		<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-		<link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet" />
+		
 	</head>
 	<body>
-		<div class="page">
-			<main class="content">
-				<slot />
-			</main>
-			<aside class="sidebar">
-				<nav class="nav" aria-label="Main navigation">
-					{currentPath === '/' ? (
-						<span class="nav-link active" data-key="h"><span class="nav-key">[h]</span> home</span>
-					) : (
-						<a href="/" class="nav-link" data-key="h"><span class="nav-key">[h]</span> home</a>
-					)}
-					{currentPath === '/blog' ? (
-						<span class="nav-link active" data-key="b"><span class="nav-key">[b]</span> blog</span>
-					) : (
-						<a href="/blog" class="nav-link" data-key="b"><span class="nav-key">[b]</span> blog</a>
-					)}
-					{currentPath === '/projects' ? (
-						<span class="nav-link active" data-key="p"><span class="nav-key">[p]</span> projects</span>
-					) : (
-						<a href="/projects" class="nav-link" data-key="p"><span class="nav-key">[p]</span> projects</a>
-					)}
-				</nav>
-				<div class="links">
-					<a href="https://github.com/pandacover" target="_blank" rel="noopener noreferrer" data-key="g"><span class="nav-key">[g]</span> github</a>
-					<a href="https://www.linkedin.com/in/luvmakin/" target="_blank" rel="noopener noreferrer" data-key="l"><span class="nav-key">[l]</span> linkedin</a>
-					<a href="https://x.com/flexaboiL" target="_blank" rel="noopener noreferrer" data-key="x"><span class="nav-key">[x]</span> x</a>
-				</div>
-			</aside>
-		</div>
+		<div class="grain-overlay" aria-hidden="true"></div>
+
+		<nav class="nav-widget" id="nav-widget">
+			<div class="nav-links">
+				<a href="/#hero" class="nav-link" data-key="h" data-section="hero"><span class="nav-key">[h]</span><span class="nav-label"> home</span></a>
+				<a href="/#blog" class="nav-link" data-key="b" data-section="blog"><span class="nav-key">[b]</span><span class="nav-label"> blog</span></a>
+				<a href="/#projects" class="nav-link" data-key="p" data-section="projects"><span class="nav-key">[p]</span><span class="nav-label"> projects</span></a>
+			</div>
+			<div class="nav-separator"></div>
+			<div class="nav-social">
+				<a href="https://github.com/pandacover" target="_blank" rel="noopener noreferrer" data-key="g" aria-label="github">[g]</a>
+				<a href="https://www.linkedin.com/in/luvmakin/" target="_blank" rel="noopener noreferrer" data-key="l" aria-label="linkedin">[l]</a>
+				<a href="https://x.com/flexaboiL" target="_blank" rel="noopener noreferrer" data-key="x" aria-label="x">[x]</a>
+			</div>
+		</nav>
+
+		<slot />
+
 		<script>
+			const widget = document.getElementById('nav-widget');
+			const navLinks = document.querySelectorAll('.nav-link[data-section]');
+			const sections = document.querySelectorAll('.section[id]');
+
+			function onScroll() {
+				if (!widget) return;
+				const hero = document.getElementById('hero');
+				if (hero) {
+					const heroBottom = hero.getBoundingClientRect().bottom;
+					if (heroBottom < 0) {
+						widget.classList.add('scrolled-past-hero');
+					} else {
+						widget.classList.remove('scrolled-past-hero');
+					}
+				}
+
+				let currentSection = '';
+				sections.forEach((section) => {
+					const rect = section.getBoundingClientRect();
+					if (rect.top <= 200) {
+						currentSection = section.id;
+					}
+				});
+
+				navLinks.forEach((link) => {
+					const el = link as HTMLElement;
+					if (el.dataset.section === currentSection) {
+						el.classList.add('active');
+					} else {
+						el.classList.remove('active');
+					}
+				});
+			}
+
+			window.addEventListener('scroll', onScroll, { passive: true });
+			onScroll();
+
 			document.addEventListener('keydown', (e) => {
 				if (e.target instanceof HTMLInputElement || e.target instanceof HTMLTextAreaElement) return;
 				const key = e.key.toLowerCase();
-				const path = window.location.pathname.replace(/\/$/, '') || '/';
-				if (key === 'h' && path !== '/') { window.location.href = '/'; e.preventDefault(); }
-				if (key === 'b' && path !== '/blog') { window.location.href = '/blog'; e.preventDefault(); }
-				if (key === 'p' && path !== '/projects') { window.location.href = '/projects'; e.preventDefault(); }
-				if (key === 'g') { window.open('https://github.com/pandacover', '_blank'); e.preventDefault(); }
-				if (key === 'l') { window.open('https://www.linkedin.com/in/luvmakin/', '_blank'); e.preventDefault(); }
-				if (key === 'x') { window.open('https://x.com/flexaboiL', '_blank'); e.preventDefault(); }
+				const isHome = window.location.pathname === '/';
+				const sectionMap: Record<string, string> = {
+					h: '#hero',
+					b: '#blog',
+					p: '#projects',
+				};
+				const socialMap: Record<string, string> = {
+					g: 'https://github.com/pandacover',
+					l: 'https://www.linkedin.com/in/luvmakin/',
+					x: 'https://x.com/flexaboiL',
+				};
+				if (sectionMap[key]) {
+					if (isHome) {
+						const target = document.querySelector(sectionMap[key]);
+						target?.scrollIntoView({ behavior: 'smooth' });
+					} else {
+						window.location.href = '/' + sectionMap[key];
+					}
+					e.preventDefault();
+				}
+				if (socialMap[key]) {
+					window.open(socialMap[key], '_blank');
+					e.preventDefault();
+				}
 			});
+
+			const revealElements = document.querySelectorAll('.reveal-on-scroll');
+			const observer = new IntersectionObserver(
+				(entries) => {
+					entries.forEach((entry) => {
+						if (entry.isIntersecting) {
+							entry.target.classList.add('visible');
+							observer.unobserve(entry.target);
+						}
+					});
+				},
+				{ threshold: 0.1, rootMargin: '0px 0px -50px 0px' }
+			);
+			revealElements.forEach((el) => observer.observe(el));
 		</script>
 	</body>
 </html>

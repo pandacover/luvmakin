@@ -1,0 +1,84 @@
+---
+import { marked } from 'marked';
+import Layout from '../../../layouts/Layout.astro';
+import { getBlogPostContent, getBlogPosts } from '../../../lib/blogs';
+
+export async function getStaticPaths() {
+	const posts = await getBlogPosts();
+
+	return posts.map((post) => ({
+		params: {
+			category: post.categorySlug,
+			slug: post.slug,
+		},
+		props: { post },
+	}));
+}
+
+const { post } = Astro.props;
+const content = await getBlogPostContent(post);
+const usedHeadingIds = new Map();
+
+const slugifyHeading = (value) => value
+	.toLowerCase()
+	.replace(/`([^`]+)`/g, '$1')
+	.replace(/\[([^\]]+)\]\([^)]+\)/g, '$1')
+	.replace(/[^a-z0-9\s-]/g, '')
+	.replace(/\s+/g, '-')
+	.replace(/-+/g, '-')
+	.replace(/^-|-$/g, '') || 'section';
+
+const getUniqueHeadingId = (value) => {
+	const baseId = slugifyHeading(value);
+	const count = usedHeadingIds.get(baseId) ?? 0;
+	usedHeadingIds.set(baseId, count + 1);
+	return count === 0 ? baseId : `${baseId}-${count + 1}`;
+};
+
+const headings = [...content.matchAll(/^(#{1,6})\s+(.+)$/gm)].map((match) => {
+	const depth = match[1].length;
+	const text = match[2].trim();
+	const id = getUniqueHeadingId(text);
+
+	return { depth, text, id };
+});
+
+let headingIndex = 0;
+const html = marked.parse(content, { async: false }).replace(
+	/<h([1-6])>([\s\S]*?)<\/h\1>/g,
+	(match) => {
+		const heading = headings[headingIndex];
+		headingIndex += 1;
+
+		if (!heading) return match;
+
+		return match.replace(`<h${heading.depth}>`, `<h${heading.depth} id="${heading.id}">`);
+	}
+);
+---
+
+<Layout
+	title={`${post.title} — luv makin`}
+	description={post.excerpt || `A blog post in ${post.category}.`}
+>
+	{headings.length > 0 && (
+		<nav class="blog-index" aria-label="Blog sections">
+			<div class="blog-index-title">index</div>
+			{headings.map((heading) => (
+				<a
+					href={`#${heading.id}`}
+					class={`blog-index-link blog-index-depth-${heading.depth}`}
+				>
+					{heading.text}
+				</a>
+			))}
+		</nav>
+	)}
+	<div class="content-area" style="padding-top: 6rem;">
+		<article class="section reveal-on-scroll blog-post-page">
+			<a href="/blog" class="blog-back-link">← all blogs</a>
+			<div class="blog-category-label">{post.category}</div>
+			<div class="blog-content" set:html={html} />
+		</article>
+	</div>
+</Layout>
