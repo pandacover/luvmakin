@@ -1,61 +1,66 @@
 ---
 import Layout from '../layouts/Layout.astro';
+import { getBlogPosts } from '../lib/blogs';
 import { getProjects } from '../lib/projects';
 
 const allProjects = await getProjects();
-const recentProjects = allProjects.slice(0, 2).map((p) => ({
-	title: p.name,
-	description: p.summary ?? '',
-	url: p.url,
-}));
+const featuredBlogs = (await getBlogPosts()).slice(0, 3);
 ---
 
 <Layout
-	title="Home"
-	description="Frontend engineer building workflow systems and AI-assisted tools. Into UI architecture, AI exploration, and coffee."
-	pathname={Astro.url.pathname}
+	title="luv makin"
+	description="indexing the chaos — frontend engineer building workflow systems and AI-assisted tools."
 >
-	<section class="intro">
-		<h1>luv makin</h1>
-		<p class="tagline">frontend engineer</p>
-		<p>
-			i've spent the last ~3 years building workflow systems and ai-assisted tools,
-			mostly focused on ui architecture and making complex data flows feel simple.
-			outside of work i like playing around with ai systems and exploring what's
-			possible with them. powered by mass amounts of coffee.
-		</p>
+	<section class="hero" id="hero">
+		<h1 class="hero-name">luv makin</h1>
+		<p class="hero-subtitle">indexing the chaos</p>
+		<div class="scroll-hint">↓</div>
 	</section>
 
-	<section class="section">
-		<h2>Work</h2>
-		<div class="work-item">
-			<h3 class="work-title">software engineer i — tekion</h3>
-			<div class="work-timeline">jul 2023 – present</div>
-			<p class="work-summary">
-				built graph-based workflow systems for a product saas platform: architected nested node graphs
-				with cycle prevention and consistent layout, implemented singleton memory model and partial
-				updates for performance, built ai-assisted editing with vercel ai sdk for chatbot-driven
-				workflow construction, designed extensible plugin architecture, led webpack to rspack
-				migration (~25% faster builds).
-			</p>
-		</div>
-	</section>
+	<div class="content-area">
+		<section class="section reveal-on-scroll" id="work">
+			<h2 class="section-title">work</h2>
+			<div class="work-entry">
+				<h3 class="work-title">software engineer i — tekion</h3>
+				<div class="work-timeline">jul 2023 – present</div>
+				<p class="work-summary">
+					built graph-based workflow systems for a product saas platform: architected nested node graphs
+					with cycle prevention and consistent layout, implemented singleton memory model and partial
+					updates for performance, built ai-assisted editing with vercel ai sdk for chatbot-driven
+					workflow construction, designed extensible plugin architecture, led webpack to rspack
+					migration (~25% faster builds).
+				</p>
+			</div>
+		</section>
 
-	<section class="section">
-		<h2>Blog</h2>
-		<p class="coming-soon">coming soon</p>
-	</section>
+		<section class="section reveal-on-scroll" id="blog">
+			<h2 class="section-title">blog</h2>
+			{featuredBlogs.length > 0 ? (
+				<>
+					<div class="blog-list">
+						{featuredBlogs.map((post) => (
+							<article class="blog-card">
+								<div class="blog-category-label">{post.category}</div>
+								<a href={post.href} class="blog-name">{post.title}</a>
+								{post.excerpt && <p class="blog-description">{post.excerpt}</p>}
+							</article>
+						))}
+					</div>
+					<a href="/blog" class="section-cta">show all</a>
+				</>
+			) : (
+				<p class="coming-soon">coming soon</p>
+			)}
+		</section>
 
-	<section class="section">
-		<h2>Projects</h2>
-		<ul class="item-list">
-			{recentProjects.map((project) => (
-				<li>
-					<a href={project.url}>{project.title}</a>
-					<div class="item-meta">{project.description}</div>
-				</li>
+		<section class="section reveal-on-scroll" id="projects">
+			<h2 class="section-title">projects</h2>
+			{allProjects.map((project) => (
+				<div class="project-card">
+					<a href={project.url} target="_blank" rel="noopener noreferrer" class="project-name">{project.name}</a>
+					{project.summary && <p class="project-description">{project.summary}</p>}
+				</div>
 			))}
-		</ul>
-		<a href="/projects">View all →</a>
-	</section>
+		</section>
+	</div>
 </Layout>

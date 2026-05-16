@@ -1,12 +1,40 @@
 ---
 import Layout from '../layouts/Layout.astro';
+import { getBlogCategories } from '../lib/blogs';
+
+const categories = await getBlogCategories();
 ---
 
 <Layout
-	title="Blog"
+	title="blog — luv makin"
 	description="Blog posts and writing on frontend engineering, workflow systems, and AI-assisted interfaces."
-	pathname={Astro.url.pathname}
 >
-	<h1 class="page-title section-heading">blog</h1>
-	<p class="coming-soon">coming soon</p>
+	<div class="content-area" style="padding-top: 6rem;">
+		<section class="section reveal-on-scroll">
+			<h2 class="section-title">blog</h2>
+			{categories.length > 0 ? (
+				<div class="blog-categories">
+					{categories.map((category) => (
+						<section class="blog-category" aria-labelledby={`category-${category.name}`}>
+							<h3 id={`category-${category.name}`} class="blog-category-title">{category.name}</h3>
+							{category.posts.length > 0 ? (
+								<div class="blog-list">
+									{category.posts.map((post) => (
+										<article class="blog-card">
+											<a href={post.href} class="blog-name">{post.title}</a>
+											{post.excerpt && <p class="blog-description">{post.excerpt}</p>}
+										</article>
+									))}
+								</div>
+							) : (
+								<p class="coming-soon">no posts yet</p>
+							)}
+						</section>
+					))}
+				</div>
+			) : (
+				<p class="coming-soon">coming soon</p>
+			)}
+		</section>
+	</div>
 </Layout>

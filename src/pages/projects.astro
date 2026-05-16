@@ -6,17 +6,18 @@ const projects = await getProjects();
 ---
 
 <Layout
-	title="Projects"
+	title="projects — luv makin"
 	description="Open source projects and side work in frontend engineering, workflow systems, and developer tools."
-	pathname={Astro.url.pathname}
 >
-	<h1 class="page-title section-heading">projects</h1>
-	<ul class="project-list">
-		{projects.map((project) => (
-			<li class="project-item">
-				<h3><a href={project.url} target="_blank" rel="noopener noreferrer">{project.name}</a></h3>
-				{project.summary && <p class="project-summary">{project.summary}</p>}
-			</li>
-		))}
-	</ul>
+	<div class="content-area" style="padding-top: 6rem;">
+		<section class="section reveal-on-scroll">
+			<h2 class="section-title">projects</h2>
+			{projects.map((project) => (
+				<div class="project-card">
+					<a href={project.url} target="_blank" rel="noopener noreferrer" class="project-name">{project.name}</a>
+					{project.summary && <p class="project-description">{project.summary}</p>}
+				</div>
+			))}
+		</section>
+	</div>
 </Layout>
