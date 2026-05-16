@@ -1,133 +1,194 @@
 ---
-import '../styles/global.css';
+import Analytics from "@vercel/analytics/astro";
+import "../styles/global.css";
 
 interface Props {
-	title: string;
-	description?: string;
+    title: string;
+    description?: string;
 }
 
 const { title, description } = Astro.props;
-const canonicalUrl = new URL(Astro.url.pathname, Astro.site ?? Astro.url.origin).toString();
+const canonicalUrl = new URL(
+    Astro.url.pathname,
+    Astro.site ?? Astro.url.origin,
+).toString();
 ---
 
 <!doctype html>
 <html lang="en">
-	<head>
-		<meta charset="utf-8" />
-		<meta name="viewport" content="width=device-width, initial-scale=1" />
-		<meta name="generator" content={Astro.generator} />
-		<title>{title}</title>
-		{description && <meta name="description" content={description} />}
-		<link rel="canonical" href={canonicalUrl} />
-		<link rel="icon" href="/profile-picture.jpg" type="image/jpeg" />
-		<meta property="og:title" content={title} />
-		{description && <meta property="og:description" content={description} />}
-		<meta property="og:type" content="website" />
-		<meta property="og:url" content={canonicalUrl} />
-		<meta name="twitter:card" content="summary" />
-		<meta name="twitter:title" content={title} />
-		{description && <meta name="twitter:description" content={description} />}
-		
-	</head>
-	<body>
-		<div class="grain-overlay" aria-hidden="true"></div>
+    <head>
+        <meta charset="utf-8" />
+        <meta name="viewport" content="width=device-width, initial-scale=1" />
+        <meta name="generator" content={Astro.generator} />
+        <title>{title}</title>
+        {description && <meta name="description" content={description} />}
+        <link rel="canonical" href={canonicalUrl} />
+        <link rel="icon" href="/profile-picture.jpg" type="image/jpeg" />
+        <meta property="og:title" content={title} />
+        {
+            description && (
+                <meta property="og:description" content={description} />
+            )
+        }
+        <meta property="og:type" content="website" />
+        <meta property="og:url" content={canonicalUrl} />
+        <meta name="twitter:card" content="summary" />
+        <meta name="twitter:title" content={title} />
+        {
+            description && (
+                <meta name="twitter:description" content={description} />
+            )
+        }
+        <Analytics />
+    </head>
+    <body>
+        <div class="grain-overlay" aria-hidden="true"></div>
 
-		<nav class="nav-widget" id="nav-widget">
-			<div class="nav-links">
-				<a href="/#hero" class="nav-link" data-key="h" data-section="hero"><span class="nav-key">[h]</span><span class="nav-label"> home</span></a>
-				<a href="/#blog" class="nav-link" data-key="b" data-section="blog"><span class="nav-key">[b]</span><span class="nav-label"> blog</span></a>
-				<a href="/#projects" class="nav-link" data-key="p" data-section="projects"><span class="nav-key">[p]</span><span class="nav-label"> projects</span></a>
-			</div>
-			<div class="nav-separator"></div>
-			<div class="nav-social">
-				<a href="https://github.com/pandacover" target="_blank" rel="noopener noreferrer" data-key="g" aria-label="github">[g]</a>
-				<a href="https://www.linkedin.com/in/luvmakin/" target="_blank" rel="noopener noreferrer" data-key="l" aria-label="linkedin">[l]</a>
-				<a href="https://x.com/flexaboiL" target="_blank" rel="noopener noreferrer" data-key="x" aria-label="x">[x]</a>
-			</div>
-		</nav>
+        <nav class="nav-widget" id="nav-widget">
+            <div class="nav-links">
+                <a
+                    href="/#hero"
+                    class="nav-link"
+                    data-key="h"
+                    data-section="hero"
+                    ><span class="nav-key">[h]</span><span class="nav-label">
+                        home</span
+                    ></a
+                >
+                <a
+                    href="/#blog"
+                    class="nav-link"
+                    data-key="b"
+                    data-section="blog"
+                    ><span class="nav-key">[b]</span><span class="nav-label">
+                        blog</span
+                    ></a
+                >
+                <a
+                    href="/#projects"
+                    class="nav-link"
+                    data-key="p"
+                    data-section="projects"
+                    ><span class="nav-key">[p]</span><span class="nav-label">
+                        projects</span
+                    ></a
+                >
+            </div>
+            <div class="nav-separator"></div>
+            <div class="nav-social">
+                <a
+                    href="https://github.com/pandacover"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    data-key="g"
+                    aria-label="github">[g]</a
+                >
+                <a
+                    href="https://www.linkedin.com/in/luvmakin/"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    data-key="l"
+                    aria-label="linkedin">[l]</a
+                >
+                <a
+                    href="https://x.com/flexaboiL"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    data-key="x"
+                    aria-label="x">[x]</a
+                >
+            </div>
+        </nav>
 
-		<slot />
+        <slot />
 
-		<script>
-			const widget = document.getElementById('nav-widget');
-			const navLinks = document.querySelectorAll('.nav-link[data-section]');
-			const sections = document.querySelectorAll('.section[id]');
+        <script>
+            const widget = document.getElementById("nav-widget");
+            const navLinks = document.querySelectorAll(
+                ".nav-link[data-section]",
+            );
+            const sections = document.querySelectorAll(".section[id]");
 
-			function onScroll() {
-				if (!widget) return;
-				const hero = document.getElementById('hero');
-				if (hero) {
-					const heroBottom = hero.getBoundingClientRect().bottom;
-					if (heroBottom < 0) {
-						widget.classList.add('scrolled-past-hero');
-					} else {
-						widget.classList.remove('scrolled-past-hero');
-					}
-				}
+            function onScroll() {
+                if (!widget) return;
+                const hero = document.getElementById("hero");
+                if (hero) {
+                    const heroBottom = hero.getBoundingClientRect().bottom;
+                    if (heroBottom < 0) {
+                        widget.classList.add("scrolled-past-hero");
+                    } else {
+                        widget.classList.remove("scrolled-past-hero");
+                    }
+                }
 
-				let currentSection = '';
-				sections.forEach((section) => {
-					const rect = section.getBoundingClientRect();
-					if (rect.top <= 200) {
-						currentSection = section.id;
-					}
-				});
+                let currentSection = "";
+                sections.forEach((section) => {
+                    const rect = section.getBoundingClientRect();
+                    if (rect.top <= 200) {
+                        currentSection = section.id;
+                    }
+                });
 
-				navLinks.forEach((link) => {
-					const el = link as HTMLElement;
-					if (el.dataset.section === currentSection) {
-						el.classList.add('active');
-					} else {
-						el.classList.remove('active');
-					}
-				});
-			}
+                navLinks.forEach((link) => {
+                    const el = link as HTMLElement;
+                    if (el.dataset.section === currentSection) {
+                        el.classList.add("active");
+                    } else {
+                        el.classList.remove("active");
+                    }
+                });
+            }
 
-			window.addEventListener('scroll', onScroll, { passive: true });
-			onScroll();
+            window.addEventListener("scroll", onScroll, { passive: true });
+            onScroll();
 
-			document.addEventListener('keydown', (e) => {
-				if (e.target instanceof HTMLInputElement || e.target instanceof HTMLTextAreaElement) return;
-				const key = e.key.toLowerCase();
-				const isHome = window.location.pathname === '/';
-				const sectionMap: Record<string, string> = {
-					h: '#hero',
-					b: '#blog',
-					p: '#projects',
-				};
-				const socialMap: Record<string, string> = {
-					g: 'https://github.com/pandacover',
-					l: 'https://www.linkedin.com/in/luvmakin/',
-					x: 'https://x.com/flexaboiL',
-				};
-				if (sectionMap[key]) {
-					if (isHome) {
-						const target = document.querySelector(sectionMap[key]);
-						target?.scrollIntoView({ behavior: 'smooth' });
-					} else {
-						window.location.href = '/' + sectionMap[key];
-					}
-					e.preventDefault();
-				}
-				if (socialMap[key]) {
-					window.open(socialMap[key], '_blank');
-					e.preventDefault();
-				}
-			});
+            document.addEventListener("keydown", (e) => {
+                if (
+                    e.target instanceof HTMLInputElement ||
+                    e.target instanceof HTMLTextAreaElement
+                )
+                    return;
+                const key = e.key.toLowerCase();
+                const isHome = window.location.pathname === "/";
+                const sectionMap: Record<string, string> = {
+                    h: "#hero",
+                    b: "#blog",
+                    p: "#projects",
+                };
+                const socialMap: Record<string, string> = {
+                    g: "https://github.com/pandacover",
+                    l: "https://www.linkedin.com/in/luvmakin/",
+                    x: "https://x.com/flexaboiL",
+                };
+                if (sectionMap[key]) {
+                    if (isHome) {
+                        const target = document.querySelector(sectionMap[key]);
+                        target?.scrollIntoView({ behavior: "smooth" });
+                    } else {
+                        window.location.href = "/" + sectionMap[key];
+                    }
+                    e.preventDefault();
+                }
+                if (socialMap[key]) {
+                    window.open(socialMap[key], "_blank");
+                    e.preventDefault();
+                }
+            });
 
-			const revealElements = document.querySelectorAll('.reveal-on-scroll');
-			const observer = new IntersectionObserver(
-				(entries) => {
-					entries.forEach((entry) => {
-						if (entry.isIntersecting) {
-							entry.target.classList.add('visible');
-							observer.unobserve(entry.target);
-						}
-					});
-				},
-				{ threshold: 0.1, rootMargin: '0px 0px -50px 0px' }
-			);
-			revealElements.forEach((el) => observer.observe(el));
-		</script>
-	</body>
+            const revealElements =
+                document.querySelectorAll(".reveal-on-scroll");
+            const observer = new IntersectionObserver(
+                (entries) => {
+                    entries.forEach((entry) => {
+                        if (entry.isIntersecting) {
+                            entry.target.classList.add("visible");
+                            observer.unobserve(entry.target);
+                        }
+                    });
+                },
+                { threshold: 0.1, rootMargin: "0px 0px -50px 0px" },
+            );
+            revealElements.forEach((el) => observer.observe(el));
+        </script>
+    </body>
 </html>
