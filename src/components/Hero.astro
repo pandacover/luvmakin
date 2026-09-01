@@ -1,20 +1,22 @@
 ---
 import "../styles/hero.css";
+import { handTop } from "../lib/handTop";
+import { handBottom } from "../lib/handBottom";
 ---
 
 <section class="hero" id="hero">
 	<div class="hero-spatial" data-hero-spatial>
-		<div class="hero-hand hero-hand-top" data-depth="0.42" aria-hidden="true">
-			<img src="/hero/hand-top.webp" alt="" width="1000" height="640" />
+		<div class="hero-hand hero-hand-top" data-depth="0.46" aria-hidden="true">
+			<img src={handTop} alt="" width="1000" height="640" draggable="false" />
 		</div>
 
-		<div class="hero-copy" data-depth="0.12">
+		<div class="hero-copy" data-depth="0.1">
 			<p class="hero-kicker">luv makin</p>
 			<h1 class="hero-title">indexing the chaos</h1>
 		</div>
 
-		<div class="hero-hand hero-hand-bottom" data-depth="-0.55" aria-hidden="true">
-			<img src="/hero/hand-bottom.webp" alt="" width="1000" height="640" />
+		<div class="hero-hand hero-hand-bottom" data-depth="-0.58" aria-hidden="true">
+			<img src={handBottom} alt="" width="1000" height="640" draggable="false" />
 		</div>
 	</div>
 
