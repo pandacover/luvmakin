@@ -10,8 +10,10 @@
     isolation: isolate;
     touch-action: pan-y;
     background: #050403;
-    margin-bottom: -6.5rem;
-    padding-bottom: 6.5rem;
+    box-sizing: border-box;
+    padding-top: calc(env(safe-area-inset-top, 0px) + 3.6rem);
+    padding-bottom: 7rem;
+    margin-bottom: -6rem;
 }
 
 .hero::before {
@@ -51,9 +53,11 @@
     position: relative;
     z-index: 2;
     width: min(100vw, 46rem);
-    height: 100svh;
+    flex: 1 1 auto;
+    min-height: 0;
+    height: calc(100svh - env(safe-area-inset-top, 0px) - 10.6rem);
     display: grid;
-    grid-template-rows: minmax(0, 1fr) auto minmax(0, 1fr);
+    grid-template-rows: minmax(0, 1.08fr) auto minmax(0, 1fr);
     place-items: center;
     perspective: 1100px;
     perspective-origin: var(--hero-ox) var(--hero-oy);
@@ -69,7 +73,8 @@
 }
 
 .hero-hand {
-    width: min(92vw, 36rem);
+    width: min(84vw, 34rem);
+    max-height: 34vh;
     pointer-events: none;
     user-select: none;
 }
@@ -77,7 +82,9 @@
 .hero-hand img {
     display: block;
     width: 100%;
-    height: auto;
+    height: 100%;
+    max-height: 34vh;
+    object-fit: contain;
     mix-blend-mode: lighten;
     -webkit-mask-image: radial-gradient(ellipse 72% 78% at 50% 50%, #000 58%, transparent 82%);
     mask-image: radial-gradient(ellipse 72% 78% at 50% 50%, #000 58%, transparent 82%);
@@ -85,14 +92,14 @@
 
 .hero-hand-top {
     grid-row: 1;
-    align-self: end;
+    align-self: center;
     z-index: 2;
     transform: translate3d(0, 5.4rem, 0);
 }
 
 .hero-hand-bottom {
     grid-row: 3;
-    align-self: start;
+    align-self: center;
     z-index: 2;
     transform: translate3d(0, -5.8rem, 0);
 }
@@ -157,7 +164,7 @@
     z-index: 8;
     color: #8a7b6c;
     font-family: var(--font-sans);
-    bottom: 8.2rem;
+    bottom: 7.4rem;
 }
 
 .content-area {
@@ -167,6 +174,17 @@
 }
 
 @media (max-width: 768px) {
+    .hero {
+        padding-top: calc(env(safe-area-inset-top, 0px) + 4.25rem);
+        padding-bottom: 6.5rem;
+    }
+
+    .hero-spatial {
+        width: 100vw;
+        height: calc(100svh - env(safe-area-inset-top, 0px) - 11.2rem);
+        grid-template-rows: minmax(0, 1.12fr) auto minmax(0, 1.05fr);
+    }
+
     .hero-title {
         font-size: clamp(1.55rem, 7.8vw, 2.25rem);
         line-height: 1.22;
@@ -174,12 +192,12 @@
     }
 
     .hero-hand {
-        width: min(100vw, 28rem);
+        width: min(78vw, 22rem);
+        max-height: 28vh;
     }
 
-    .hero-spatial {
-        width: 100vw;
-        grid-template-rows: minmax(0, 0.9fr) auto minmax(0, 1.1fr);
+    .hero-hand img {
+        max-height: 28vh;
     }
 
     .hero-copy {
@@ -188,11 +206,11 @@
     }
 
     .hero-hand-top {
-        transform: translate3d(0, 4.4rem, 0);
+        transform: translate3d(0, 3.6rem, 0);
     }
 
     .hero-hand-bottom {
-        transform: translate3d(0, -4.8rem, 0);
+        transform: translate3d(0, -3.8rem, 0);
     }
 }
 
