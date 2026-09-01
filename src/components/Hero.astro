@@ -1,0 +1,147 @@
+<section class="hero" id="hero">
+	<div class="hero-spatial" data-hero-spatial>
+		<div class="hero-hand hero-hand-top" data-depth="0.42" aria-hidden="true">
+			<img src="/hero/hand-top.webp" alt="" width="1000" height="640" />
+		</div>
+
+		<div class="hero-copy" data-depth="0.12">
+			<p class="hero-kicker">luv makin</p>
+			<h1 class="hero-title">indexing the chaos</h1>
+		</div>
+
+		<div class="hero-hand hero-hand-bottom" data-depth="-0.55" aria-hidden="true">
+			<img src="/hero/hand-bottom.webp" alt="" width="1000" height="640" />
+		</div>
+	</div>
+
+	<div class="scroll-hint">↓</div>
+</section>
+
+<script>
+	const stage = document.querySelector("[data-hero-spatial]");
+	if (stage instanceof HTMLElement) {
+		const layers = Array.from(stage.querySelectorAll<HTMLElement>("[data-depth]"));
+		const reduceMotion = window.matchMedia("(prefers-reduced-motion: reduce)");
+		const finePointer = window.matchMedia("(hover: hover) and (pointer: fine)");
+
+		const state = {
+			targetX: 0,
+			targetY: 0,
+			currentX: 0,
+			currentY: 0,
+			originBeta: null as number | null,
+			originGamma: null as number | null,
+			raf: 0,
+		};
+
+		const clamp = (value: number, min: number, max: number) =>
+			Math.min(max, Math.max(min, value));
+
+		const setTargets = (x: number, y: number) => {
+			state.targetX = clamp(x, -1, 1);
+			state.targetY = clamp(y, -1, 1);
+		};
+
+		const render = (time: number) => {
+			if (reduceMotion.matches) return;
+
+			const idleX = Math.sin(time / 2200) * 0.06;
+			const idleY = Math.cos(time / 2600) * 0.04;
+			state.currentX += (state.targetX + idleX - state.currentX) * 0.08;
+			state.currentY += (state.targetY + idleY - state.currentY) * 0.08;
+
+			const rx = (-state.currentY * 9).toFixed(3);
+			const ry = (state.currentX * 11).toFixed(3);
+			stage.style.setProperty("--hero-rx", `${rx}deg`);
+			stage.style.setProperty("--hero-ry", `${ry}deg`);
+			stage.style.setProperty("--hero-ox", `${50 + state.currentX * 10}%`);
+			stage.style.setProperty("--hero-oy", `${50 + state.currentY * 8}%`);
+
+			for (const layer of layers) {
+				const depth = Number(layer.dataset.depth ?? 0);
+				const tx = state.currentX * 36 * depth;
+				const ty = state.currentY * 28 * depth;
+				const tz = depth * 90;
+				const layerRx = -state.currentY * (4 + Math.abs(depth) * 6);
+				const layerRy = state.currentX * (5 + Math.abs(depth) * 7);
+				layer.style.transform = `translate3d(${tx.toFixed(2)}px, ${ty.toFixed(2)}px, ${tz.toFixed(2)}px) rotateX(${layerRx.toFixed(3)}deg) rotateY(${layerRy.toFixed(3)}deg)`;
+			}
+
+			state.raf = requestAnimationFrame(render);
+		};
+
+		const onPointerMove = (event: PointerEvent) => {
+			if (!finePointer.matches) return;
+			const x = (event.clientX / window.innerWidth) * 2 - 1;
+			const y = (event.clientY / window.innerHeight) * 2 - 1;
+			setTargets(x, y);
+		};
+
+		const resetPointer = () => {
+			if (finePointer.matches) setTargets(0, 0);
+		};
+
+		const onDeviceOrientation = (event: DeviceOrientationEvent) => {
+			if (finePointer.matches || event.beta == null || event.gamma == null) return;
+			if (state.originBeta == null || state.originGamma == null) {
+				state.originBeta = event.beta;
+				state.originGamma = event.gamma;
+			}
+			const x = (event.gamma - state.originGamma) / 18;
+			const y = (event.beta - state.originBeta) / 22;
+			setTargets(x, y);
+		};
+
+		const onTouchMove = (event: TouchEvent) => {
+			if (finePointer.matches || event.touches.length === 0) return;
+			const touch = event.touches[0];
+			const rect = stage.getBoundingClientRect();
+			const x = ((touch.clientX - rect.left) / rect.width) * 2 - 1;
+			const y = ((touch.clientY - rect.top) / rect.height) * 2 - 1;
+			setTargets(x * 0.85, y * 0.85);
+		};
+
+		const enableGyro = async () => {
+			const Orientation = window.DeviceOrientationEvent as typeof DeviceOrientationEvent & {
+				requestPermission?: () => Promise<string>;
+			};
+			if (typeof Orientation === "undefined") return;
+			if (typeof Orientation.requestPermission === "function") {
+				try {
+					const permission = await Orientation.requestPermission();
+					if (permission !== "granted") return;
+				} catch {
+					return;
+				}
+			}
+			window.addEventListener("deviceorientation", onDeviceOrientation, { passive: true });
+		};
+
+		if (!reduceMotion.matches) {
+			window.addEventListener("pointermove", onPointerMove);
+			document.getElementById("hero")?.addEventListener("pointerleave", resetPointer);
+			stage.addEventListener("touchmove", onTouchMove, { passive: true });
+			window.addEventListener("pointerdown", () => {
+				void enableGyro();
+			}, { once: true });
+
+			if (!finePointer.matches) {
+				void enableGyro();
+			}
+
+			state.raf = requestAnimationFrame(render);
+		}
+
+		reduceMotion.addEventListener("change", () => {
+			cancelAnimationFrame(state.raf);
+			if (!reduceMotion.matches) {
+				state.raf = requestAnimationFrame(render);
+			} else {
+				setTargets(0, 0);
+				stage.style.removeProperty("--hero-rx");
+				stage.style.removeProperty("--hero-ry");
+				for (const layer of layers) layer.style.transform = "";
+			}
+		});
+	}
+</script>
