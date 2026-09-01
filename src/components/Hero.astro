@@ -8,9 +8,12 @@ import "../styles/hero.css";
 			<img src="/hero/IMG_0269.webp" alt="" width="1000" height="640" draggable="false" />
 		</div>
 
-		<div class="hero-copy" data-depth="0.1">
+		<div class="hero-copy" data-depth="0.08">
 			<p class="hero-kicker">luv makin</p>
 			<h1 class="hero-title">indexing the chaos</h1>
+			<button class="hero-gyro" type="button" data-hero-gyro hidden>
+				tap to tilt
+			</button>
 		</div>
 
 		<div class="hero-hand hero-hand-bottom" data-depth="-0.58" aria-hidden="true">
@@ -25,6 +28,7 @@ import "../styles/hero.css";
 	const stage = document.querySelector("[data-hero-spatial]");
 	if (stage instanceof HTMLElement) {
 		const layers = Array.from(stage.querySelectorAll<HTMLElement>("[data-depth]"));
+		const gyroBtn = document.querySelector("[data-hero-gyro]");
 		const reduceMotion = window.matchMedia("(prefers-reduced-motion: reduce)");
 		const finePointer = window.matchMedia("(hover: hover) and (pointer: fine)");
 
@@ -36,6 +40,7 @@ import "../styles/hero.css";
 			originBeta: null as number | null,
 			originGamma: null as number | null,
 			raf: 0,
+			gyroOn: false,
 		};
 
 		const clamp = (value: number, min: number, max: number) =>
@@ -49,25 +54,25 @@ import "../styles/hero.css";
 		const render = (time: number) => {
 			if (reduceMotion.matches) return;
 
-			const idleX = Math.sin(time / 2200) * 0.06;
-			const idleY = Math.cos(time / 2600) * 0.04;
-			state.currentX += (state.targetX + idleX - state.currentX) * 0.08;
-			state.currentY += (state.targetY + idleY - state.currentY) * 0.08;
+			const idleX = Math.sin(time / 2200) * 0.05;
+			const idleY = Math.cos(time / 2600) * 0.03;
+			state.currentX += (state.targetX + idleX - state.currentX) * 0.1;
+			state.currentY += (state.targetY + idleY - state.currentY) * 0.1;
 
-			const rx = (-state.currentY * 9).toFixed(3);
-			const ry = (state.currentX * 11).toFixed(3);
+			const rx = (-state.currentY * 8).toFixed(3);
+			const ry = (state.currentX * 10).toFixed(3);
 			stage.style.setProperty("--hero-rx", `${rx}deg`);
 			stage.style.setProperty("--hero-ry", `${ry}deg`);
-			stage.style.setProperty("--hero-ox", `${50 + state.currentX * 10}%`);
-			stage.style.setProperty("--hero-oy", `${50 + state.currentY * 8}%`);
+			stage.style.setProperty("--hero-ox", `${50 + state.currentX * 8}%`);
+			stage.style.setProperty("--hero-oy", `${50 + state.currentY * 6}%`);
 
 			for (const layer of layers) {
 				const depth = Number(layer.dataset.depth ?? 0);
-				const tx = state.currentX * 36 * depth;
-				const ty = state.currentY * 28 * depth;
-				const tz = depth * 90;
-				const layerRx = -state.currentY * (4 + Math.abs(depth) * 6);
-				const layerRy = state.currentX * (5 + Math.abs(depth) * 7);
+				const tx = state.currentX * 32 * depth;
+				const ty = state.currentY * 24 * depth;
+				const tz = depth * 80;
+				const layerRx = -state.currentY * (3 + Math.abs(depth) * 5);
+				const layerRy = state.currentX * (4 + Math.abs(depth) * 6);
 				layer.style.transform = `translate3d(${tx.toFixed(2)}px, ${ty.toFixed(2)}px, ${tz.toFixed(2)}px) rotateX(${layerRx.toFixed(3)}deg) rotateY(${layerRy.toFixed(3)}deg)`;
 			}
 
@@ -86,51 +91,63 @@ import "../styles/hero.css";
 		};
 
 		const onDeviceOrientation = (event: DeviceOrientationEvent) => {
-			if (finePointer.matches || event.beta == null || event.gamma == null) return;
+			if (event.beta == null || event.gamma == null) return;
 			if (state.originBeta == null || state.originGamma == null) {
 				state.originBeta = event.beta;
 				state.originGamma = event.gamma;
 			}
-			const x = (event.gamma - state.originGamma) / 18;
-			const y = (event.beta - state.originBeta) / 22;
+			const x = (event.gamma - state.originGamma) / 16;
+			const y = (event.beta - state.originBeta) / 20;
 			setTargets(x, y);
 		};
 
-		const onTouchMove = (event: TouchEvent) => {
-			if (finePointer.matches || event.touches.length === 0) return;
-			const touch = event.touches[0];
-			const rect = stage.getBoundingClientRect();
-			const x = ((touch.clientX - rect.left) / rect.width) * 2 - 1;
-			const y = ((touch.clientY - rect.top) / rect.height) * 2 - 1;
-			setTargets(x * 0.85, y * 0.85);
+		const hideGyroPrompt = () => {
+			if (gyroBtn instanceof HTMLElement) gyroBtn.hidden = true;
+		};
+
+		const showGyroPrompt = () => {
+			if (gyroBtn instanceof HTMLElement) gyroBtn.hidden = false;
 		};
 
 		const enableGyro = async () => {
+			if (state.gyroOn || finePointer.matches) return;
 			const Orientation = window.DeviceOrientationEvent as typeof DeviceOrientationEvent & {
 				requestPermission?: () => Promise<string>;
 			};
-			if (typeof Orientation === "undefined") return;
+			if (typeof Orientation === "undefined") {
+				hideGyroPrompt();
+				return;
+			}
 			if (typeof Orientation.requestPermission === "function") {
 				try {
 					const permission = await Orientation.requestPermission();
-					if (permission !== "granted") return;
+					if (permission !== "granted") {
+						showGyroPrompt();
+						return;
+					}
 				} catch {
+					showGyroPrompt();
 					return;
 				}
 			}
+			state.gyroOn = true;
 			window.addEventListener("deviceorientation", onDeviceOrientation, { passive: true });
+			hideGyroPrompt();
 		};
 
 		if (!reduceMotion.matches) {
 			window.addEventListener("pointermove", onPointerMove);
 			document.getElementById("hero")?.addEventListener("pointerleave", resetPointer);
-			stage.addEventListener("touchmove", onTouchMove, { passive: true });
-			window.addEventListener("pointerdown", () => {
-				void enableGyro();
-			}, { once: true });
 
 			if (!finePointer.matches) {
-				void enableGyro();
+				showGyroPrompt();
+				gyroBtn?.addEventListener("click", (event) => {
+					event.preventDefault();
+					void enableGyro();
+				});
+				stage.addEventListener("pointerup", () => {
+					void enableGyro();
+				}, { once: true });
 			}
 
 			state.raf = requestAnimationFrame(render);
