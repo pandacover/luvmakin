@@ -1,0 +1,67 @@
+@import url("https://fonts.googleapis.com/css2?family=Figtree:ital,wght@0,400;0,500;0,600;1,500&family=Instrument+Serif:ital@0;1&display=swap");
+
+:root {
+    --bg: #050403;
+    --bg-surface: #0d0b09;
+    --grain-tint: #070605;
+    --text-primary: #f4e7d6;
+    --text-primary-light: #f4e7d690;
+    --text-secondary: #a39382;
+    --text-tertiary: #6d6257;
+    --accent: #d7b08a;
+    --accent-dim: #8d6a49;
+    --border: rgba(244, 231, 214, 0.08);
+    --border-strong: rgba(215, 176, 138, 0.28);
+    --font-sans: "Figtree", system-ui, sans-serif;
+    --font-serif: "Instrument Serif", "Times New Roman", serif;
+    --font-mono: "Figtree", system-ui, sans-serif;
+}
+
+html {
+    background: var(--bg);
+}
+
+body {
+    font-family: var(--font-sans) !important;
+    color: var(--text-primary);
+    background: var(--bg) !important;
+    background-image: none !important;
+    text-transform: none;
+}
+
+body::before {
+    display: none !important;
+    background-image: none !important;
+}
+
+.nav-widget,
+.nav-link,
+.nav-social a,
+.nav-key,
+.work-timeline,
+.blog-category-label,
+.blog-category-title,
+.section-cta,
+.blog-index-title,
+.blog-index-link,
+.scroll-hint {
+    font-family: var(--font-sans) !important;
+}
+
+.hero-title,
+.section-title,
+.blog-content h1,
+.work-title,
+.project-name,
+.blog-name {
+    font-family: var(--font-serif) !important;
+    font-style: italic;
+}
+
+.work-summary,
+.project-description,
+.blog-description,
+.blog-content,
+.coming-soon {
+    font-family: var(--font-sans) !important;
+}

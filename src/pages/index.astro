@@ -1,5 +1,6 @@
 ---
 import Layout from '../layouts/Layout.astro';
+import Hero from '../components/Hero.astro';
 import { getBlogPosts } from '../lib/blogs';
 import { getProjects } from '../lib/projects';
 
@@ -11,11 +12,7 @@ const featuredBlogs = (await getBlogPosts()).slice(0, 3);
 	title="luv makin"
 	description="indexing the chaos — frontend engineer building workflow systems and AI-assisted tools."
 >
-	<section class="hero" id="hero">
-		<h1 class="hero-name">luv makin</h1>
-		<p class="hero-subtitle">indexing the chaos</p>
-		<div class="scroll-hint">↓</div>
-	</section>
+	<Hero />
 
 	<div class="content-area">
 		<section class="section reveal-on-scroll" id="work">

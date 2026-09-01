@@ -1,0 +1,186 @@
+---
+import "../styles/hero.css";
+---
+
+<section class="hero" id="hero">
+	<div class="hero-spatial" data-hero-spatial>
+		<div class="hero-hand hero-hand-top" data-hand="top" data-depth="0.46" aria-hidden="true">
+			<img src="/hero/IMG_0269.webp" alt="" width="1000" height="640" draggable="false" />
+		</div>
+
+		<div class="hero-copy" data-hero-copy data-depth="0.08">
+			<p class="hero-kicker">luv makin</p>
+			<h1 class="hero-title">indexing the chaos</h1>
+			<button class="hero-gyro" type="button" data-hero-gyro hidden>
+				tap to tilt
+			</button>
+		</div>
+
+		<div class="hero-hand hero-hand-bottom" data-hand="bottom" data-depth="-0.58" aria-hidden="true">
+			<img src="/hero/IMG_0270.webp" alt="" width="1000" height="640" draggable="false" />
+		</div>
+	</div>
+
+	<div class="scroll-hint">↓</div>
+</section>
+
+<script>
+	const stage = document.querySelector("[data-hero-spatial]");
+	if (stage instanceof HTMLElement) {
+		const layers = Array.from(stage.querySelectorAll<HTMLElement>("[data-depth]"));
+		const copy = document.querySelector("[data-hero-copy]");
+		const gyroBtn = document.querySelector("[data-hero-gyro]");
+		const reduceMotion = window.matchMedia("(prefers-reduced-motion: reduce)");
+		const finePointer = window.matchMedia("(hover: hover) and (pointer: fine)");
+
+		const INTRO_DELAY = 160;
+		const INTRO_MS = 1680;
+		const CLOSE_TOP = 86;
+		const CLOSE_BOTTOM = 94;
+
+		const easeOutCubic = (t: number) => 1 - (1 - t) ** 3;
+		const clamp = (value: number, min: number, max: number) =>
+			Math.min(max, Math.max(min, value));
+
+		const state = {
+			targetX: 0,
+			targetY: 0,
+			currentX: 0,
+			currentY: 0,
+			originBeta: null as number | null,
+			originGamma: null as number | null,
+			raf: 0,
+			gyroOn: false,
+			startedAt: performance.now(),
+		};
+
+		const setTargets = (x: number, y: number) => {
+			state.targetX = clamp(x, -1, 1);
+			state.targetY = clamp(y, -1, 1);
+		};
+
+		const introProgress = (time: number) => {
+			if (reduceMotion.matches) return 1;
+			const raw = clamp((time - state.startedAt - INTRO_DELAY) / INTRO_MS, 0, 1);
+			return easeOutCubic(raw);
+		};
+
+		const render = (time: number) => {
+			const open = introProgress(time);
+			const closed = 1 - open;
+			const textOpacity = clamp((open - 0.22) / 0.56, 0, 1);
+
+			stage.style.setProperty("--hero-open", open.toFixed(4));
+			if (copy instanceof HTMLElement) {
+				copy.style.opacity = textOpacity.toFixed(3);
+			}
+
+			if (!reduceMotion.matches) {
+				const idleX = Math.sin(time / 2200) * 0.05 * open;
+				const idleY = Math.cos(time / 2600) * 0.03 * open;
+				state.currentX += (state.targetX * open + idleX - state.currentX) * 0.1;
+				state.currentY += (state.targetY * open + idleY - state.currentY) * 0.1;
+
+				stage.style.setProperty("--hero-rx", `${(-state.currentY * 8).toFixed(3)}deg`);
+				stage.style.setProperty("--hero-ry", `${(state.currentX * 10).toFixed(3)}deg`);
+				stage.style.setProperty("--hero-ox", `${50 + state.currentX * 8}%`);
+				stage.style.setProperty("--hero-oy", `${50 + state.currentY * 6}%`);
+			}
+
+			for (const layer of layers) {
+				const depth = Number(layer.dataset.depth ?? 0);
+				const hand = layer.dataset.hand;
+				const claspY =
+					hand === "top" ? closed * CLOSE_TOP : hand === "bottom" ? -closed * CLOSE_BOTTOM : 0;
+				const tx = state.currentX * 32 * depth;
+				const ty = state.currentY * 24 * depth + claspY;
+				const tz = depth * 80 * open;
+				const layerRx = -state.currentY * (3 + Math.abs(depth) * 5);
+				const layerRy = state.currentX * (4 + Math.abs(depth) * 6);
+				layer.style.transform = `translate3d(${tx.toFixed(2)}px, ${ty.toFixed(2)}px, ${tz.toFixed(2)}px) rotateX(${layerRx.toFixed(3)}deg) rotateY(${layerRy.toFixed(3)}deg)`;
+			}
+
+			state.raf = requestAnimationFrame(render);
+		};
+
+		const onPointerMove = (event: PointerEvent) => {
+			if (!finePointer.matches) return;
+			const x = (event.clientX / window.innerWidth) * 2 - 1;
+			const y = (event.clientY / window.innerHeight) * 2 - 1;
+			setTargets(x, y);
+		};
+
+		const resetPointer = () => {
+			if (finePointer.matches) setTargets(0, 0);
+		};
+
+		const onDeviceOrientation = (event: DeviceOrientationEvent) => {
+			if (event.beta == null || event.gamma == null) return;
+			if (state.originBeta == null || state.originGamma == null) {
+				state.originBeta = event.beta;
+				state.originGamma = event.gamma;
+			}
+			const x = (event.gamma - state.originGamma) / 16;
+			const y = (event.beta - state.originBeta) / 20;
+			setTargets(x, y);
+		};
+
+		const hideGyroPrompt = () => {
+			if (gyroBtn instanceof HTMLElement) gyroBtn.hidden = true;
+		};
+
+		const showGyroPrompt = () => {
+			if (gyroBtn instanceof HTMLElement) gyroBtn.hidden = false;
+		};
+
+		const enableGyro = async () => {
+			if (state.gyroOn || finePointer.matches) return;
+			const Orientation = window.DeviceOrientationEvent as typeof DeviceOrientationEvent & {
+				requestPermission?: () => Promise<string>;
+			};
+			if (typeof Orientation === "undefined") {
+				hideGyroPrompt();
+				return;
+			}
+			if (typeof Orientation.requestPermission === "function") {
+				try {
+					const permission = await Orientation.requestPermission();
+					if (permission !== "granted") {
+						showGyroPrompt();
+						return;
+					}
+				} catch {
+					showGyroPrompt();
+					return;
+				}
+			}
+			state.gyroOn = true;
+			window.addEventListener("deviceorientation", onDeviceOrientation, { passive: true });
+			hideGyroPrompt();
+		};
+
+		if (!finePointer.matches && !reduceMotion.matches) {
+			showGyroPrompt();
+			gyroBtn?.addEventListener("click", (event) => {
+				event.preventDefault();
+				void enableGyro();
+			});
+			stage.addEventListener("pointerup", () => {
+				void enableGyro();
+			}, { once: true });
+		}
+
+		if (!reduceMotion.matches) {
+			window.addEventListener("pointermove", onPointerMove);
+			document.getElementById("hero")?.addEventListener("pointerleave", resetPointer);
+		}
+
+		state.raf = requestAnimationFrame(render);
+
+		reduceMotion.addEventListener("change", () => {
+			cancelAnimationFrame(state.raf);
+			state.startedAt = performance.now();
+			state.raf = requestAnimationFrame(render);
+		});
+	}
+</script>
