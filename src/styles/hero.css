@@ -1,0 +1,148 @@
+.hero {
+    height: 100svh;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-direction: column;
+    text-align: center;
+    position: relative;
+    overflow: hidden;
+    isolation: isolate;
+    touch-action: pan-y;
+}
+
+.hero::after {
+    content: "";
+    position: absolute;
+    inset: 0;
+    pointer-events: none;
+    background:
+        radial-gradient(ellipse at center, transparent 42%, var(--bg) 86%),
+        linear-gradient(to bottom, var(--bg) 0%, transparent 14%, transparent 86%, var(--bg) 100%);
+    z-index: 5;
+}
+
+.hero-spatial {
+    --hero-rx: 0deg;
+    --hero-ry: 0deg;
+    --hero-ox: 50%;
+    --hero-oy: 50%;
+    position: relative;
+    width: min(100vw, 46rem);
+    height: 100svh;
+    display: grid;
+    grid-template-rows: minmax(0, 1.05fr) auto minmax(0, 1.2fr);
+    place-items: center;
+    perspective: 900px;
+    perspective-origin: var(--hero-ox) var(--hero-oy);
+    transform-style: preserve-3d;
+    transform: rotateX(var(--hero-rx)) rotateY(var(--hero-ry));
+    will-change: transform;
+}
+
+.hero-hand,
+.hero-copy {
+    transform-style: preserve-3d;
+    will-change: transform;
+}
+
+.hero-hand {
+    width: min(92vw, 34rem);
+    pointer-events: none;
+    user-select: none;
+}
+
+.hero-hand img {
+    display: block;
+    width: 100%;
+    height: auto;
+    filter: drop-shadow(0 18px 40px rgba(0, 0, 0, 0.45));
+}
+
+.hero-hand-top {
+    grid-row: 1;
+    align-self: end;
+    z-index: 2;
+}
+
+.hero-hand-bottom {
+    grid-row: 3;
+    align-self: start;
+    z-index: 4;
+}
+
+.hero-copy {
+    grid-row: 2;
+    z-index: 3;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: 0.35rem 1.25rem 0.75rem;
+    max-width: min(92vw, 28rem);
+}
+
+.hero-kicker {
+    font-family: "Geist Mono", monospace;
+    font-size: 0.72rem;
+    color: var(--text-secondary);
+    letter-spacing: 0.22em;
+    margin-bottom: 0.55rem;
+    animation: hero-reveal-up 0.7s cubic-bezier(0.16, 1, 0.3, 1) 0.2s forwards;
+    opacity: 0;
+}
+
+.hero-title {
+    font-family: "Geist Pixel", "Geist Mono", monospace;
+    font-size: clamp(1.05rem, 3.4vw, 1.7rem);
+    color: var(--accent);
+    letter-spacing: 0.16em;
+    line-height: 1.15;
+    text-transform: lowercase;
+    animation: hero-reveal-up 0.8s cubic-bezier(0.16, 1, 0.3, 1) 0.35s forwards;
+    opacity: 0;
+}
+
+@keyframes hero-reveal-up {
+    from {
+        opacity: 0;
+        clip-path: inset(100% 0 0 0);
+    }
+    to {
+        opacity: 1;
+        clip-path: inset(0% 0 0 0);
+    }
+}
+
+.hero .scroll-hint {
+    z-index: 6;
+}
+
+@media (max-width: 768px) {
+    .hero-title {
+        font-size: clamp(0.95rem, 4.6vw, 1.25rem);
+        letter-spacing: 0.12em;
+    }
+
+    .hero-hand {
+        width: min(96vw, 28rem);
+    }
+
+    .hero-spatial {
+        width: 100vw;
+    }
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .hero-kicker,
+    .hero-title {
+        animation: none !important;
+        opacity: 1 !important;
+    }
+
+    .hero-spatial,
+    .hero-hand,
+    .hero-copy {
+        transform: none !important;
+    }
+}
