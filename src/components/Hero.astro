@@ -4,11 +4,11 @@ import "../styles/hero.css";
 
 <section class="hero" id="hero">
 	<div class="hero-spatial" data-hero-spatial>
-		<div class="hero-hand hero-hand-top" data-depth="0.46" aria-hidden="true">
+		<div class="hero-hand hero-hand-top" data-hand="top" data-depth="0.46" aria-hidden="true">
 			<img src="/hero/IMG_0269.webp" alt="" width="1000" height="640" draggable="false" />
 		</div>
 
-		<div class="hero-copy" data-depth="0.08">
+		<div class="hero-copy" data-hero-copy data-depth="0.08">
 			<p class="hero-kicker">luv makin</p>
 			<h1 class="hero-title">indexing the chaos</h1>
 			<button class="hero-gyro" type="button" data-hero-gyro hidden>
@@ -16,7 +16,7 @@ import "../styles/hero.css";
 			</button>
 		</div>
 
-		<div class="hero-hand hero-hand-bottom" data-depth="-0.58" aria-hidden="true">
+		<div class="hero-hand hero-hand-bottom" data-hand="bottom" data-depth="-0.58" aria-hidden="true">
 			<img src="/hero/IMG_0270.webp" alt="" width="1000" height="640" draggable="false" />
 		</div>
 	</div>
@@ -28,9 +28,19 @@ import "../styles/hero.css";
 	const stage = document.querySelector("[data-hero-spatial]");
 	if (stage instanceof HTMLElement) {
 		const layers = Array.from(stage.querySelectorAll<HTMLElement>("[data-depth]"));
+		const copy = document.querySelector("[data-hero-copy]");
 		const gyroBtn = document.querySelector("[data-hero-gyro]");
 		const reduceMotion = window.matchMedia("(prefers-reduced-motion: reduce)");
 		const finePointer = window.matchMedia("(hover: hover) and (pointer: fine)");
+
+		const INTRO_DELAY = 160;
+		const INTRO_MS = 1680;
+		const CLOSE_TOP = 86;
+		const CLOSE_BOTTOM = 94;
+
+		const easeOutCubic = (t: number) => 1 - (1 - t) ** 3;
+		const clamp = (value: number, min: number, max: number) =>
+			Math.min(max, Math.max(min, value));
 
 		const state = {
 			targetX: 0,
@@ -41,36 +51,50 @@ import "../styles/hero.css";
 			originGamma: null as number | null,
 			raf: 0,
 			gyroOn: false,
+			startedAt: performance.now(),
 		};
-
-		const clamp = (value: number, min: number, max: number) =>
-			Math.min(max, Math.max(min, value));
 
 		const setTargets = (x: number, y: number) => {
 			state.targetX = clamp(x, -1, 1);
 			state.targetY = clamp(y, -1, 1);
 		};
 
+		const introProgress = (time: number) => {
+			if (reduceMotion.matches) return 1;
+			const raw = clamp((time - state.startedAt - INTRO_DELAY) / INTRO_MS, 0, 1);
+			return easeOutCubic(raw);
+		};
+
 		const render = (time: number) => {
-			if (reduceMotion.matches) return;
+			const open = introProgress(time);
+			const closed = 1 - open;
+			const textOpacity = clamp((open - 0.22) / 0.56, 0, 1);
 
-			const idleX = Math.sin(time / 2200) * 0.05;
-			const idleY = Math.cos(time / 2600) * 0.03;
-			state.currentX += (state.targetX + idleX - state.currentX) * 0.1;
-			state.currentY += (state.targetY + idleY - state.currentY) * 0.1;
+			stage.style.setProperty("--hero-open", open.toFixed(4));
+			if (copy instanceof HTMLElement) {
+				copy.style.opacity = textOpacity.toFixed(3);
+			}
 
-			const rx = (-state.currentY * 8).toFixed(3);
-			const ry = (state.currentX * 10).toFixed(3);
-			stage.style.setProperty("--hero-rx", `${rx}deg`);
-			stage.style.setProperty("--hero-ry", `${ry}deg`);
-			stage.style.setProperty("--hero-ox", `${50 + state.currentX * 8}%`);
-			stage.style.setProperty("--hero-oy", `${50 + state.currentY * 6}%`);
+			if (!reduceMotion.matches) {
+				const idleX = Math.sin(time / 2200) * 0.05 * open;
+				const idleY = Math.cos(time / 2600) * 0.03 * open;
+				state.currentX += (state.targetX * open + idleX - state.currentX) * 0.1;
+				state.currentY += (state.targetY * open + idleY - state.currentY) * 0.1;
+
+				stage.style.setProperty("--hero-rx", `${(-state.currentY * 8).toFixed(3)}deg`);
+				stage.style.setProperty("--hero-ry", `${(state.currentX * 10).toFixed(3)}deg`);
+				stage.style.setProperty("--hero-ox", `${50 + state.currentX * 8}%`);
+				stage.style.setProperty("--hero-oy", `${50 + state.currentY * 6}%`);
+			}
 
 			for (const layer of layers) {
 				const depth = Number(layer.dataset.depth ?? 0);
+				const hand = layer.dataset.hand;
+				const claspY =
+					hand === "top" ? closed * CLOSE_TOP : hand === "bottom" ? -closed * CLOSE_BOTTOM : 0;
 				const tx = state.currentX * 32 * depth;
-				const ty = state.currentY * 24 * depth;
-				const tz = depth * 80;
+				const ty = state.currentY * 24 * depth + claspY;
+				const tz = depth * 80 * open;
 				const layerRx = -state.currentY * (3 + Math.abs(depth) * 5);
 				const layerRy = state.currentX * (4 + Math.abs(depth) * 6);
 				layer.style.transform = `translate3d(${tx.toFixed(2)}px, ${ty.toFixed(2)}px, ${tz.toFixed(2)}px) rotateX(${layerRx.toFixed(3)}deg) rotateY(${layerRy.toFixed(3)}deg)`;
@@ -135,34 +159,28 @@ import "../styles/hero.css";
 			hideGyroPrompt();
 		};
 
+		if (!finePointer.matches && !reduceMotion.matches) {
+			showGyroPrompt();
+			gyroBtn?.addEventListener("click", (event) => {
+				event.preventDefault();
+				void enableGyro();
+			});
+			stage.addEventListener("pointerup", () => {
+				void enableGyro();
+			}, { once: true });
+		}
+
 		if (!reduceMotion.matches) {
 			window.addEventListener("pointermove", onPointerMove);
 			document.getElementById("hero")?.addEventListener("pointerleave", resetPointer);
-
-			if (!finePointer.matches) {
-				showGyroPrompt();
-				gyroBtn?.addEventListener("click", (event) => {
-					event.preventDefault();
-					void enableGyro();
-				});
-				stage.addEventListener("pointerup", () => {
-					void enableGyro();
-				}, { once: true });
-			}
-
-			state.raf = requestAnimationFrame(render);
 		}
+
+		state.raf = requestAnimationFrame(render);
 
 		reduceMotion.addEventListener("change", () => {
 			cancelAnimationFrame(state.raf);
-			if (!reduceMotion.matches) {
-				state.raf = requestAnimationFrame(render);
-			} else {
-				setTargets(0, 0);
-				stage.style.removeProperty("--hero-rx");
-				stage.style.removeProperty("--hero-ry");
-				for (const layer of layers) layer.style.transform = "";
-			}
+			state.startedAt = performance.now();
+			state.raf = requestAnimationFrame(render);
 		});
 	}
 </script>
