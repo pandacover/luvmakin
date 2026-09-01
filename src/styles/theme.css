@@ -1,0 +1,67 @@
+@import url("https://fonts.googleapis.com/css2?family=Figtree:ital,wght@0,400;0,500;0,600;1,500&family=IBM+Plex+Mono:wght@400;500&family=Instrument+Serif:ital@0;1&display=swap");
+
+:root {
+    --bg: #040302;
+    --bg-surface: #0c0b0a;
+    --grain-tint: #070605;
+    --text-primary: #f3ece3;
+    --text-primary-light: #f3ece390;
+    --text-secondary: #9a8f82;
+    --text-tertiary: #5c554c;
+    --accent: #d9a06a;
+    --accent-dim: #8f6840;
+    --border: rgba(243, 236, 227, 0.08);
+    --border-strong: rgba(217, 160, 106, 0.28);
+    --font-sans: "Figtree", system-ui, sans-serif;
+    --font-serif: "Instrument Serif", "Times New Roman", serif;
+    --font-mono: "IBM Plex Mono", ui-monospace, monospace;
+}
+
+html {
+    background: var(--bg);
+}
+
+body {
+    font-family: var(--font-sans);
+    color: var(--text-primary);
+    background: var(--bg) !important;
+    background-image: none !important;
+    text-transform: none;
+}
+
+body::before {
+    display: none !important;
+}
+
+.nav-widget,
+.nav-link,
+.nav-social a,
+.nav-key,
+.work-timeline,
+.blog-category-label,
+.blog-category-title,
+.section-cta,
+.blog-index-title,
+.blog-index-link,
+.hero-kicker,
+.scroll-hint {
+    font-family: var(--font-mono);
+}
+
+.hero-title,
+.section-title,
+.blog-content h1,
+.work-title,
+.project-name,
+.blog-name {
+    font-family: var(--font-serif);
+    font-style: italic;
+}
+
+.work-summary,
+.project-description,
+.blog-description,
+.blog-content,
+.coming-soon {
+    font-family: var(--font-sans);
+}
